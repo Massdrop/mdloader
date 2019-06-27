@@ -4,13 +4,13 @@
 
 2. Plug in your keyboard.
 
-3. Press the reset button on your keyboard.
+3. In your terminal, change to the directory where you downloaded the executable and applet-*.bin file(s).
 
-4. In your terminal, change to the directory where you downloaded the executable and applet-*.bin file(s).
+4. **Windows** - Run `timeout 15 ; mdloader_windows.exe --first --download FILE_NAME --restart`. Replace "FILE_NAME" with the filename of your compiled firmware.  
+**Linux** - Run `sleep 15 && mdloader_linux --first --download FILE_NAME --restart`. Replace "FILE_NAME" with the filename of your compiled firmware.  
+**Mac** - Run `sleep 15 && mdloader_mac --first --download FILE_NAME --restart`.  If you downloaded with Mac Safari, run `mdloader_mac.dms --first --download FILE_NAME --restart`. Replace "FILE_NAME" with the filename of your compiled firmware.  
 
-5. **Windows** - Run `mdloader_windows.exe --first --download FILE_NAME --restart`. Replace "FILE_NAME" with the filename of your compiled firmware.  
-**Linux** - Run `mdloader_linux --first --download FILE_NAME --restart`. Replace "FILE_NAME" with the filename of your compiled firmware.  
-**Mac** - Run `mdloader_mac --first --download FILE_NAME --restart`.  If you downloaded with Mac Safari, run `mdloader_mac.dms --first --download FILE_NAME --restart`. Replace "FILE_NAME" with the filename of your compiled firmware.  
+5. Press the reset button on your keyboard within 15 seconds.
 
 6. Enjoy (important)
 
