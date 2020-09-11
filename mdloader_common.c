@@ -35,7 +35,7 @@ appinfo_t appinfo;      //Applet application information from end of applet bina
 mcu_t mcus[] = {
       //Name,       Chip ID     Chip ID,    Program Memory, Data Memory,    Program Addr,   Data Addr
       //            Address                 (FLASH_SIZE)    (HSRAM_SIZE)    (FLASH_ADDR)    (HSRAM_ADDR)
-    { "SAMD51J18A", 0x41002018, 0x60060006, 0x40000,        0x20000,        0x00000000,     0x20000000},
+    { "SAMD51J18A", 0x41002018, 0x60060005, 0x60060006, 0x40000,        0x20000,        0x00000000,     0x20000000},
 };
 
 mcu_t *mcu; //Pointer to mcus entry if found
