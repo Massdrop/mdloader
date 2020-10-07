@@ -377,6 +377,65 @@ int test_mcu(char silent)
     return 1;
 }
 
+#define DSU 0x41002000
+#define DSU_STATUSB (DSU + 2)
+
+#define NVMCTRL 0x41004000
+#define NVMCTRL_CTRLA (NVMCTRL)
+#define NVMCTRL_CTRLB (NVMCTRL + 4)
+#define NVMCTRL_ADDR (NVMCTRL + 0x14)
+
+#define NVMCTRL_CTRLB_CMDEX_KEY 0xA500
+#define NVMCTRL_CTRLB_CMD_WQW 0x4
+#define NVMCTRL_CTRLB_CMD_PBC 0x15
+#define NVMCTRL_CTRLB_CMD_EP 0x0
+
+#define NVMCTRL_USER 0x00804000
+
+int write_user_row(uint32_t *data)
+{
+    uint16_t status = read_half_word(DSU_STATUSB);
+    printf("dsu statusb: %08x\n", status);
+    write_half_word(DSU_STATUSB, status);
+
+    uint32_t cfg = read_word(NVMCTRL_CTRLA); /* clear nvm interrupt status bits */
+    printf("nvm config: %08x\n", cfg);
+    cfg &= ~(0xf0);
+    write_word(NVMCTRL_CTRLA, cfg);
+
+    write_word(NVMCTRL_ADDR, NVMCTRL_USER); /* set user row address */
+    write_half_word(NVMCTRL_CTRLB, (NVMCTRL_CTRLB_CMDEX_KEY|NVMCTRL_CTRLB_CMD_EP)); /* erase page */
+    slp(100);
+    write_half_word(NVMCTRL_CTRLB, (NVMCTRL_CTRLB_CMDEX_KEY|NVMCTRL_CTRLB_CMD_PBC)); /* erase write buffer */
+    slp(100);
+    for(int i = 0; i < 4; i++) {
+        write_word(NVMCTRL_USER + i * 4, data[i]); /* write in the write buffer */
+    }
+    write_word(NVMCTRL_ADDR, NVMCTRL_USER); /* set user row address */
+    write_half_word(NVMCTRL_CTRLB, (NVMCTRL_CTRLB_CMDEX_KEY|NVMCTRL_CTRLB_CMD_WQW)); /* program quad word (128bits) */
+    slp(100);
+    return 0;
+}
+
+int read_user_row(void)
+{
+    uint32_t user_row[4];
+    printf("user row: ");
+    for (int i = 0; i < 4; i++) {
+        user_row[i] = read_word(0x804000 + i * 4);
+        printf("0x%08x ", user_row[i]);
+    }
+    printf("\n");
+    if ((user_row[1] & 0x7f) != 0x12) {
+        printf("SmartEEPROM not configured, proceed\n");
+        user_row[1] |= (0x12);
+        write_user_row(user_row);
+    } else {
+        printf("SmartEEPROM already configured\n");
+    }
+    return 0;
+}
+
 //Upper case any lower case characters in a string
 void strlower(char *str)
 {
@@ -490,6 +549,7 @@ void display_help(void)
     printf("  -s --size size                 Read firmware size of <size>\n");
     printf("  -D --download file             Write firmware from <file> into device\n");
     printf("  -t --test                      Test mode (download/upload writes disabled, upload outputs data to stdout, restart disabled)\n");
+    printf("     --smarteep                  Enable Smart EEPROM MCU feature\n");
     printf("     --cols count                Hex listing column count <count> [%i]\n", COLS);
     printf("     --colw width                Hex listing column width <width> [%i]\n", COLW);
     printf("     --restart                   Restart device after successful programming\n");
@@ -498,6 +558,7 @@ void display_help(void)
 
 #define SW_COLS     1000
 #define SW_COLW     1001
+#define SW_SMARTEEP 1002
 
 //Program command line options
 struct option long_options[] = {
@@ -515,6 +576,7 @@ struct option long_options[] = {
     { "addr",           required_argument,  0,  'a' },
     { "size",           required_argument,  0,  's' },
     { "test",           no_argument,        0,  't' },
+    { "smarteep",       no_argument,        0,  SW_SMARTEEP },
     { "cols",           required_argument,  0,  SW_COLS },
     { "colw",           required_argument,  0,  SW_COLW },
     { 0, 0, 0, 0 }
@@ -626,6 +688,10 @@ int main(int argc, char *argv[])
 
             case 't':
                 testmode = 1;
+                break;
+
+            case SW_SMARTEEP:
+                command = CMD_READ_USER_ROW;
                 break;
 
             case SW_COLS:
@@ -750,6 +816,14 @@ int main(int argc, char *argv[])
 
     print_bootloader_version();
     if (verbose) printf("Device ID: %08X\n", mcu->cidr);
+
+    if (command == CMD_READ_USER_ROW)
+    {
+        read_user_row();
+        goto exitProgram;
+    }
+
+
 
     //Load applet
     FILE *fIn;
