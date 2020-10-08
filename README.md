@@ -100,3 +100,4 @@ Test mode also allows viewing of binary data from a read instead of writing to a
 ## Troubleshooting
 
 **Linux**: User may need to be added to group dialout to access programming port  
+**Mac**: User may need to prefix mdloader_mac: `./mdloader_mac` per [#8](https://github.com/Massdrop/mdloader/issues/8)  
