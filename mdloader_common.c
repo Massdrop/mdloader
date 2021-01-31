@@ -20,6 +20,10 @@
 #include "mdloader_common.h"
 #include "mdloader_parser.h"
 
+#ifdef _MSC_VER
+#pragma warning(disable:4996)
+#endif
+
 char verbose;
 char testmode;
 char first_device;

@@ -19,6 +19,10 @@
 
 #include "mdloader_common.h"
 
+#ifdef _MSC_VER
+#pragma warning(disable:4996)
+#endif
+
 #define EXAMPLE_PORT "COM23"
 #define PORT_SEARCH_STRING "COM"
 
@@ -469,7 +473,8 @@ int close_port(char silent)
 //Return 1 on sucess, 0 on failure
 int config_port(void)
 {
-    DCB dcb = {};
+    DCB dcb;
+    memset(&dcb, 0, sizeof(DCB));
 
     if (verbose) printf("Configuring port... \n");
 
