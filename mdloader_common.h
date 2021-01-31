@@ -45,7 +45,12 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdint.h>
+
+#ifdef _MSC_VER
+#include "getopt.h"
+#else
 #include <getopt.h>
+#endif
 
 //Atmel files
 #include "./atmel/applet.h"
